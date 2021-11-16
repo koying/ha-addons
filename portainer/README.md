@@ -37,12 +37,10 @@ volumes.
 [:books: Read the full add-on documentation][docs]
 
 
-## DISCONTINUED
+## FORKED
 
-This add-on is no longer available.
-
-It has been used quite a lot for unsupported porposes, causing many issues,
-support questions and other problems.
+This add-on has been discontinued by its author, and is no more available from the Community repository.
+This is a best-effort fork.
 
 If you run Home Assistant, please be aware that running additional containers
 is not a supported use-case and will trigger your system to be flagged

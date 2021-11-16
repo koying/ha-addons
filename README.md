@@ -15,6 +15,7 @@ The add-on is installed like any other:
 5. Configure at **Configuration** tab or separate file in [**Configuration folder**](https://www.home-assistant.io/getting-started/configuration/) according to the instructions of the selected add-on:
 
 - [DynuDNS](./dynudns-addon)
+- [portainer](./portainer)
 
 6. Click <kbd>Start</kbd>, give it a few seconds to spin up.
 7. Enjoy.

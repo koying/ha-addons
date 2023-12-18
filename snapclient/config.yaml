@@ -4,15 +4,12 @@ slug: sbapclient
 description: >-
   "Snapclient for Snapcast"
 arch: 
-  - "armhf"
-  - "armv7"
-  - "aarch64"
-  - "amd64"
-  - "i386"
+  - aarch64
+  - amd64
+  - armv7
+  - i386
 audio: true
-
-map:
-  - config:rw
+init: false
 
 schema:
   host: str

@@ -20,7 +20,7 @@ FROM $BUILD_FROM
 COPY dummy qemu-*-static /usr/bin/
 LABEL maintainer="Koying"
 
-RUN apk add alsa-lib avahi-libs expat flac libvorbis opus soxr \
+RUN apk add libstdc++ libgcc alsa-lib avahi-libs expat flac libvorbis opus soxr \
  && rm -rf /etc/ssl /var/cache/apk/* /lib/apk/db/* /root/snapcast /usr/bin/dummy
  
 COPY --from=snapcast /root/snapcast/bin/snapclient /usr/local/bin
@@ -28,4 +28,5 @@ COPY --from=snapcast /root/snapcast/bin/snapclient /usr/local/bin
 # Copy data
 COPY data/*.sh /
 
-CMD [ "/run.sh" ]
+# CMD [ "/run.sh" ]
+ENTRYPOINT ["snapclient"]

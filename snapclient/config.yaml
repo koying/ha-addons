@@ -8,7 +8,12 @@ arch:
   - amd64
   - armv7
   - i386
+
+# Sound
 audio: true
+devices:
+ - /dev/snd
+
 init: false
 
 schema:

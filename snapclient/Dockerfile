@@ -28,5 +28,5 @@ COPY --from=snapcast /root/snapcast/bin/snapclient /usr/local/bin
 # Copy data
 COPY data/*.sh /
 
-# CMD [ "/run.sh" ]
-ENTRYPOINT ["snapclient"]
+CMD [ "/run.sh" ]
+# ENTRYPOINT ["snapclient"]

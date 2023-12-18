@@ -1,4 +1,6 @@
-ARG BUILD_FROM
+ARG BUILD_FROM="ghcr.io/hassio-addons/base/amd64:15.0.2"
+ARG BUILD_ARCH="amd64"
+
 FROM $BUILD_FROM
 
 # from: https://github.com/raph2i/hassio-addons
@@ -10,7 +12,7 @@ ENV LANG C.UTF-8
 RUN apk add --no-cache snapcast bash alsa-plugins-pulse
 
 # Copy data for add-on
-COPY run.sh /
+COPY data/run.sh /
 RUN chmod a+x /run.sh
 
 CMD [ "/run.sh" ]

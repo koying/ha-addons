@@ -1,0 +1,22 @@
+name: "Snapclient"
+version: "1.1.0"
+slug: sbapclient
+description: >-
+  "Snapclient for Snapcast"
+arch: 
+  - "armhf"
+  - "armv7"
+  - "aarch64"
+  - "amd64"
+  - "i386"
+audio: true
+
+map:
+  - config:rw
+
+schema:
+  host: str
+  port: port?
+options:
+  host: ""
+  port: 1704

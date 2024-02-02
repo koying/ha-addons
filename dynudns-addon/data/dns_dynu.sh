@@ -77,16 +77,20 @@ dns_dynu_rm() {
 
 _get_domain_id() {
   domain=$1
-  if ! _dynu_rest GET "dns/getroot/$domain" ""; then
+  if ! _dynu_rest GET "dns" ""; then
+    bashio::log.warning "DynuDNS GET dns API call failed."
     return 1
   fi
 
   bashio::log.debug "$domain" "$response"
 
-  if _contains "$response" "\"domainName\":\"$domain\"" >/dev/null; then
-    DynuDnsId=$(printf "%s" "$response" | tr -d "{}" | cut -d , -f 2 | cut -d : -f 2)
+  if jq --arg name "$domain" 'any(.domains[]; .name == $name)'; then
+    DynuDnsId=$(echo $response | jq --arg name "$domain" '.domains[] | select(.name == $name) | .id')
+    bashio::log.debug "Fetched DynuDnsId: " "${DynuDnsId}"
     return 0
   fi
+  
+  bashio::log.warning "Failed to get DynuDNS domain id"
   return 1
 
 }
@@ -139,10 +143,10 @@ _dynu_rest() {
   fi
 
   if [ "$?" != "0" ]; then
-    bashio::log.error "error $ep"
+    bashio::log.error " _dynu_rest error is:  $ep"
     return 1
   fi
-  bashio::log.debug response "$response"
+  bashio::log.debug " _dynu_rest response is: $response"
   return 0
 }
 

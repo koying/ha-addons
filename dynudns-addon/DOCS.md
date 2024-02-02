@@ -123,7 +123,10 @@ The number of seconds to wait before updating DynuDNS subdomains and renewing Le
 
 ## Credit
 
-This add-on is at 99% a copy of the official DuckDNS add-on 
+This add-on is at 94% a copy of the official DuckDNS add-on and ACME.sh
+[upstream run.sh]: https://github.com/home-assistant/addons/blob/master/duckdns/data/run.sh
+[upstream hook.sh]: https://github.com/home-assistant/addons/blob/master/duckdns/data/hook.sh
+[upstream dnsdynu.sh]: https://github.com/acmesh-official/acme.sh/blob/master/dnsapi/dns_dynu.sh
 
 ## Support
 

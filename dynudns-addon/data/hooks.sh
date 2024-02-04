@@ -1,4 +1,4 @@
-#!/usr/bin/env bashio
+#!/usr/bin/with-contenv bashio
 # shellcheck disable=SC2034
 set -e
 
@@ -6,7 +6,7 @@ source dns_dynu.sh
 
 CONFIG_PATH=/data/options.json
 
-SYS_TOKEN=$(jq --raw-output '.token' $CONFIG_PATH)
+DNS_API_TOKEN=$(jq --raw-output '.dns_api_token' $CONFIG_PATH)
 SYS_CERTFILE=$(jq --raw-output '.lets_encrypt.certfile' $CONFIG_PATH)
 SYS_KEYFILE=$(jq --raw-output '.lets_encrypt.keyfile' $CONFIG_PATH)
 
@@ -32,11 +32,9 @@ deploy_challenge() {
     #   validation, this is what you want to put in the _acme-challenge
     #   TXT record. For HTTP validation it is the value that is expected
     #   be found in the $TOKEN_FILENAME file.
-
-    Dynu_Token=$SYS_TOKEN
-    dns_dynu_add $ALIAS $TOKEN_VALUE
-
-    bashio::log.info " + Settling down for 10s..."
+    bashio::log.info "[${FUNCNAME[0]} ${BASH_SOURCE[0]}:${LINENO}] Args: $@" "Deploying TXT Challenge for $ALIAS"
+    dns_dynu_add_txt_record $ALIAS $TOKEN_VALUE
+    bashio::log.info "[${FUNCNAME[0]} ${BASH_SOURCE[0]}:${LINENO}] Args: $@" "Settling down for 10s..."
     sleep 10
 
 }
@@ -51,8 +49,7 @@ clean_challenge() {
     #
     # The parameters are the same as for deploy_challenge.
 
-    Dynu_Token=$SYS_TOKEN
-    dns_dynu_rm $ALIAS $TOKEN_VALUE
+    dns_dynu_rm_record $ALIAS $TOKEN_VALUE
 }
 
 deploy_cert() {

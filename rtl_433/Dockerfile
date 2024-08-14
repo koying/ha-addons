@@ -18,8 +18,8 @@ RUN git clone https://github.com/koying/rtl_433
 WORKDIR ./rtl_433
 
 # Build a specific commit or tag.
-# ARG rtl433GitRevision=23.11
-# RUN git checkout ${rtl433GitRevision}
+ARG rtl433GitRevision=nice_flor
+RUN git checkout ${rtl433GitRevision}
 WORKDIR ./build
 RUN cmake ..
 RUN make -j 4

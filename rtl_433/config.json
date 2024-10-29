@@ -1,6 +1,6 @@
 {
   "name": "rtl_433",
-  "version": "67.1.4",
+  "version": "67.1.5",
   "slug": "rtl433",
   "description": "Receive wireless sensor data via an SDR dongle and rtl_433",
   "url": "https://github.com/koying/ha-addons/tree/main/rtl_433",

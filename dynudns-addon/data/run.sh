@@ -97,7 +97,7 @@ while true; do
     fi
 
     # Determine IPv6 Address
-    if [[ -n "$ipv6_fixed" ]]; then # use fixed IPv6 address
+    if [[ -n "$ipv6_fixed" && ${ipv6_fixed} = *:* ]]; then # use fixed IPv6 address
         bashio::log.info "Using parsed argument for fixed IPv6: ${ipv6_fixed}"
         if [[ ${ipv6_fixed} == *.* ]]; then
             ipv6=${ipv6_fixed}
@@ -109,12 +109,16 @@ while true; do
     else  # Get IPv6 address from HA API, since add-on container does not have IPv6 address.
         ipv6=
         bashio::cache.flush_all
-        for addr in $(bashio::network.ipv6_address); do
-	    # Skip non-global addresses
-	    if [[ ${addr} != fe80:* && ${addr} != fc* && ${addr} != fd* ]]; then
-              ipv6=${addr%/*}
-              bashio::log.info "According to the HA Supervisor API, IPv6 address is ${ipv6}"
-              break
+        for addr in $(bashio::network.ipv6_address "${ipv6_fixed}"); do
+	        # Skip non-global addresses
+	        if [[ ${addr} != fe80:* && ${addr} != fc* && ${addr} != fd* ]]; then
+                ipv6=${addr%/*}
+                    if [[ -n "$ipv6_fixed" ]]; then
+                        bashio::log.info "According to the HA Supervisor API, IPv6 address on ${ipv6_fixed} interface is ${ipv6}"
+                    else
+                        bashio::log.info "According to the HA Supervisor API, IPv6 address is ${ipv6}"
+                    fi
+                break
             fi
         done
     fi

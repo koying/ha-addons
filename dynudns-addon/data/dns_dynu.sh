@@ -84,8 +84,8 @@ _get_domain_id() {
 
   bashio::log.debug "$domain" "$response"
 
-  if jq --arg name "$domain" 'any(.domains[]; .name == $name)'; then
-    DynuDnsId=$(echo $response | jq --arg name "$domain" '.domains[] | select(.name == $name) | .id')
+  if echo "$response" | jq --arg name "$domain" 'any(.domains[]; .name == $name)'; then
+    DynuDnsId=$(echo "$response" | jq --arg name "$domain" '.domains[] | select(.name == $name) | .id')
     bashio::log.debug "Fetched DynuDnsId: " "${DynuDnsId}"
     return 0
   fi

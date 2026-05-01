@@ -123,11 +123,18 @@ while true; do
     for domain in ${DOMAINS}; do
 
         # Get current domain configuration
-        _get_domain_id "${domain}"
+        if ! _get_domain_id "${domain}"; then
+            bashio::log.warning "Could not get domain ID for ${domain}, skipping update (network issue?)"
+            continue
+        fi
         bashio::log.info "Getting current domain configuration for domain: ${domain}"
         bashio::log.debug "DynuDnsId: ${DynuDnsId}"
 
-        current_domain_config="$(curl -s -f -H "API-Key: $TOKEN" -H "Content-Type: application/json" "https://api.dynu.com/v2/dns/$DynuDnsId")"
+        current_domain_config="$(curl -s -f -m 10 -H "API-Key: $TOKEN" -H "Content-Type: application/json" "https://api.dynu.com/v2/dns/$DynuDnsId")"
+        if [[ -z "$current_domain_config" ]]; then
+            bashio::log.warning "Empty response from Dynu API for ${domain}, skipping (network issue?)"
+            continue
+        fi
         current_ipv4_address=$(echo "$current_domain_config" | jq -r '.ipv4Address')
         current_ipv6_address=$(echo "$current_domain_config" | jq -r '.ipv6Address')
         statusCode=$(echo "$current_domain_config" | jq '.statusCode')

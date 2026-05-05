@@ -84,7 +84,7 @@ while true; do
             exit 1
         fi
     else  # Ask external server for my IPv4 address, since HA probably doesn't know it.
-        ipv4_queried=$(curl -s -f -m 10 "${QUERY_URL_IPV4}")
+        ipv4_queried=$(curl -s -f -m 10 "${QUERY_URL_IPV4}") || true
         if [[ ${ipv4_queried} == *.* ]]; then
             bashio::log.info "According to: ${QUERY_URL_IPV4} , IPv4 address is ${ipv4_queried}"
             ipv4=${ipv4_queried}
@@ -108,8 +108,8 @@ while true; do
         fi
     else  # Get IPv6 address from HA API, since add-on container does not have IPv6 address.
         ipv6=
-        bashio::cache.flush_all
-        for addr in $(bashio::network.ipv6_address); do
+        bashio::cache.flush_all || true
+        for addr in $(bashio::network.ipv6_address || true); do
 	    # Skip non-global addresses
 	    if [[ ${addr} != fe80:* && ${addr} != fc* && ${addr} != fd* ]]; then
               ipv6=${addr%/*}
@@ -130,18 +130,18 @@ while true; do
         bashio::log.info "Getting current domain configuration for domain: ${domain}"
         bashio::log.debug "DynuDnsId: ${DynuDnsId}"
 
-        current_domain_config="$(curl -s -f -m 10 -H "API-Key: $TOKEN" -H "Content-Type: application/json" "https://api.dynu.com/v2/dns/$DynuDnsId")"
+        current_domain_config="$(curl -s -f -m 10 -H "API-Key: $TOKEN" -H "Content-Type: application/json" "https://api.dynu.com/v2/dns/$DynuDnsId")" || true
         if [[ -z "$current_domain_config" ]]; then
             bashio::log.warning "Empty response from Dynu API for ${domain}, skipping (network issue?)"
             continue
         fi
-        current_ipv4_address=$(echo "$current_domain_config" | jq -r '.ipv4Address')
-        current_ipv6_address=$(echo "$current_domain_config" | jq -r '.ipv6Address')
-        statusCode=$(echo "$current_domain_config" | jq '.statusCode')
+        current_ipv4_address=$(echo "$current_domain_config" | jq -r '.ipv4Address') || true
+        current_ipv6_address=$(echo "$current_domain_config" | jq -r '.ipv6Address') || true
+        statusCode=$(echo "$current_domain_config" | jq '.statusCode') || true
 
         # Create new domain configuration
         new_domain_config=$current_domain_config
-        if  [ "$statusCode" -eq 200 ]; then
+        if  [ "${statusCode}" = "200" ]; then
             bashio::log.info "  - Dynu DNS get config Success. \"statusCode\": $statusCode"
             if  [[ "${ipv4}" == *.* ]]; then # Replace ipv4Address and ipv4 fields
                 new_domain_config=$(echo "$new_domain_config" | jq ".ipv4Address = \"${ipv4}\" | .ipv4 = true")
@@ -151,17 +151,17 @@ while true; do
             fi
         else
             bashio::log.warning "  - Dynu DNS get config failed, not \"statusCode:\" ${statusCode}. It answered: ${answer}"
-            break
+            continue
         fi
 
         # Update Domain config if it's different
         bashio::log.info "Updating Dynu DNS: ${domain} IP addresses"
         if [[ "$current_ipv4_address" != "$ipv4" ]] || [[ "$current_ipv6_address" != "$ipv6" ]] ; then
 
-            answer="$(curl -s -f -X POST -H "API-Key: $TOKEN" -H "Content-Type: application/json" "https://api.dynu.com/v2/dns/$DynuDnsId" -d "${new_domain_config}")"
-            statusCode=$(echo "$answer" | jq '.statusCode')
+            answer="$(curl -s -f -X POST -H "API-Key: $TOKEN" -H "Content-Type: application/json" "https://api.dynu.com/v2/dns/$DynuDnsId" -d "${new_domain_config}")" || true
+            statusCode=$(echo "$answer" | jq '.statusCode') || true
 
-            if [ "$statusCode" -eq 200 ]; then
+            if [ "${statusCode}" = "200" ]; then
                 bashio::log.info "  - Dynu DNS IP update Success: "statusCode:" ${statusCode}"
             else
                 bashio::log.warning "  - Dynu DNS IP update did not succeed. "statusCode:" "$statusCode" . It answered: ${answer}"

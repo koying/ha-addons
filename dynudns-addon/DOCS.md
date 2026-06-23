@@ -106,7 +106,7 @@ aliases:
 
 Don't add your custom domain name to the `domains` array. For certificate creation, all unique domains and aliases are used.
 
-Also, don't forget to make sure the dns-01 challenge can reach Duckdns. It might be required to add a specific CNAME for that:
+Also, don't forget to make sure the dns-01 challenge can reach DynuDNS. It might be required to add a specific CNAME for that:
 
 ```
 CNAME _acme-challenge.<own-domain>    _acme-challenge.<domain>.dynudns.org

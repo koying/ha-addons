@@ -30,7 +30,7 @@ function le_renew() {
 
     # Prepare domain for Let's Encrypt
     for domain in ${DOMAINS}; do
-        for alias in $(jq --raw-output --exit-status "[.aliases[]|{(.alias):.domain}]|add.\"${domain}\" | select(. != null)" /data/options.json) ; do
+        for alias in $(jq --raw-output --arg d "${domain}" '([.aliases[]?|{(.alias):.domain}]|add // {})[$d] // empty' /data/options.json 2>/dev/null) ; do
             aliases="${aliases} ${alias}"
         done
     done
@@ -144,13 +144,13 @@ while true; do
         if  [ "${statusCode}" = "200" ]; then
             bashio::log.info "  - Dynu DNS get config Success. \"statusCode\": $statusCode"
             if  [[ "${ipv4}" == *.* ]]; then # Replace ipv4Address and ipv4 fields
-                new_domain_config=$(echo "$new_domain_config" | jq ".ipv4Address = \"${ipv4}\" | .ipv4 = true")
+                new_domain_config=$(echo "$new_domain_config" | jq --arg ip "$ipv4" '.ipv4Address = $ip | .ipv4 = true')
             fi
             if  [[ "${ipv6}" == *:* ]]; then # Replace ipv6Address and ipv6 fields
-                new_domain_config=$(echo "$new_domain_config" | jq ".ipv6Address = \"${ipv6}\" | .ipv6 = true")
+                new_domain_config=$(echo "$new_domain_config" | jq --arg ip "$ipv6" '.ipv6Address = $ip | .ipv6 = true')
             fi
         else
-            bashio::log.warning "  - Dynu DNS get config failed, not \"statusCode:\" ${statusCode}. It answered: ${answer}"
+            bashio::log.warning "  - Dynu DNS get config failed, not \"statusCode:\" ${statusCode}. It answered: ${current_domain_config}"
             continue
         fi
 

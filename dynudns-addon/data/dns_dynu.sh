@@ -84,14 +84,24 @@ _get_domain_id() {
 
   bashio::log.debug "$domain" "$response"
 
-  if echo "$response" | jq --arg name "$domain" 'any(.domains[]; .name == $name)'; then
-    DynuDnsId=$(echo "$response" | jq --arg name "$domain" '.domains[] | select(.name == $name) | .id')
-    bashio::log.debug "Fetched DynuDnsId: " "${DynuDnsId}"
-    return 0
+  # Dynu answers non-2xx with a JSON error object ({"statusCode":401,...}) or
+  # an HTML error page. In both cases `.domains` is null and `.domains[]`
+  # aborts jq with "Cannot iterate over null". Fail cleanly instead.
+  if ! printf '%s' "$response" | jq -e '(.domains | type) == "array"' >/dev/null 2>&1; then
+    bashio::log.warning "Unexpected Dynu API response (no .domains array): ${response:0:300}"
+    return 1
   fi
-  
-  bashio::log.warning "Failed to get DynuDNS domain id"
-  return 1
+
+  DynuDnsId=$(printf '%s' "$response" | jq -r --arg name "$domain" \
+    'first(.domains[]? | select(.name == $name) | .id) // empty' 2>/dev/null) || DynuDnsId=""
+
+  if [ -z "$DynuDnsId" ]; then
+    bashio::log.warning "Domain ${domain} not found in Dynu account"
+    return 1
+  fi
+
+  bashio::log.debug "Fetched DynuDnsId: ${DynuDnsId}"
+  return 0
 
 }
 
@@ -137,9 +147,9 @@ _dynu_rest() {
 
    bashio::log.debug "$m" "$Dynu_EndPoint/$ep"
   if [ "$data" ]; then
-    response=$(curl -s -H "$_H1" -H "$_H2" -X $m "$Dynu_EndPoint/$ep" -d $data)
+    response=$(curl -s -m 10 -H "$_H1" -H "$_H2" -X "$m" "$Dynu_EndPoint/$ep" -d "$data")
   else
-    response=$(curl -s -H "$_H1" -H "$_H2" -X $m "$Dynu_EndPoint/$ep")
+    response=$(curl -s -m 10 -H "$_H1" -H "$_H2" -X "$m" "$Dynu_EndPoint/$ep")
   fi
 
   if [ "$?" != "0" ]; then

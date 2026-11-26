@@ -1,6 +1,6 @@
 {
   "name": "Dynu DNS",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "slug": "dynudns",
   "description": "Free Dynamic DNS via Dynu with Let's Encrypt support",
   "url": "https://github.com/koying/ha-addons/tree/main/dynudns-addon",
